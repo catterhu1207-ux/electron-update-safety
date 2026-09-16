@@ -1,21 +1,77 @@
 # electron-update-safety
 
-用于 Windows Electron 更新维护的实验性安全工具：在修改前核对来源摘要和版本消费者，始终从新的原始副本开始，并跟踪隔离测试主进程与后端的真实身份。
+把桌面魔改版更新这件事做得更可控：先确认你拿到的是哪一份官方候选包，再在全新的副本上工作，最后用隔离运行证明它退出时没有遗留后台进程。
 
-## 安装与最短示例
+它来自 ChatGPT/Codex 桌面魔改版的更新适配实践，但也可用于其他 Windows Electron 应用。它不是更新器，也不是补丁器；它是一套在改动前后留下可核对证据的安全护栏。
+
+## 我可以拿它做什么？
+
+- 更新自己的 ChatGPT/Codex 或其他 Electron 魔改版前，核对候选应用文件、后端描述和版本引用是否与登记一致。
+- 每次从未经修改的官方副本重新暂存，避免在上一次失败的修改品上继续叠加补丁。
+- 用独立的用户目录、日志和运行标识启动候选应用，不碰正在使用的正式版和真实会话。
+- 观察主进程与指定后端；即使窗口已经关闭，也能发现仍存活的后台进程、PID 重用或关闭超时。
+
+适合维护自定义桌面客户端、需要保留更新证据的人。不适合寻找“一键下载官方更新”或“一键自动适配”的使用者。
+
+## 三个仓库怎么选？
+
+| 你要解决的问题 | 使用这个仓库 |
+|---|---|
+| 候选包是不是对的？隔离测试有没有遗留进程？ | **electron-update-safety**（本仓库） |
+| Codex 向 Responses 兼容服务发送历史时被拒绝 | [codex-history-compat](https://github.com/catterhu1207-ux/codex-history-compat) |
+| 如何把“发现新版”推进到“已经真实验证”而不跳过证据 | [desktop-adaptation-lab](https://github.com/catterhu1207-ux/desktop-adaptation-lab) |
+
+```mermaid
+flowchart LR
+  A[官方候选包或源码] --> B[核验并全新暂存]
+  B --> C[应用兼容补丁或适配器]
+  C --> D[功能契约与证据门禁]
+  D --> E[隔离启动]
+  E --> F[真实运行验证]
+  B -.本仓库.-> E
+  C -.Codex 历史补丁.-> D
+  D -.适配框架.-> F
+```
+
+## 输入、产出与安全边界
+
+| 你提供 | 工具检查或生成 |
+|---|---|
+| 候选应用目录、清单、版本消费者目录 | 文件摘要、后端描述和显式版本引用的 JSON 检查结果 |
+| 通过检查的来源目录与工作目录 | 一个新的、可追溯的暂存副本，不复用旧失败副本 |
+| 可执行文件与隔离运行目录 | 独立用户数据、日志、`run.json` 和主进程/后端身份记录 |
+
+`stop` 只会向本工具创建、身份仍一致的可见测试窗口发送正常关闭请求。它不会强行终止用户进程，也不会下载、安装、修改或授权任何厂商应用。
+
+## 最短使用路径
+
+需要 Python 3.10+；真实进程检查仅支持 Windows。
 
 ```powershell
 py -3 -m pip install -e .
-electron-update-safety check --source C:\candidate --manifest manifest.json --consumer-root C:\adapter
-electron-update-safety stage --source C:\candidate --manifest manifest.json --consumer-root C:\adapter --work-root C:\staging
+
+# 先把 examples/manifest.json 中的占位摘要改成候选文件的真实 SHA-256。
+electron-update-safety check `
+  --source C:\candidate `
+  --manifest .\examples\manifest.json `
+  --consumer-root C:\adapter
+
+# 只有 check 通过后才暂存；每次都会生成新的 attempt 目录。
+electron-update-safety stage `
+  --source C:\candidate `
+  --manifest .\examples\manifest.json `
+  --consumer-root C:\adapter `
+  --work-root C:\staging
 ```
 
-生命周期命令为 `start`、`status`、`wait`、`stop`。`stop` 只向身份一致的可见测试窗口发送正常关闭请求；请让测试应用自行正常退出，再用 `wait` 验证主进程和所有已登记后端均已消失。
+所有命令输出 UTF-8 JSON；阻塞、后台残留或关闭超时会返回非零退出码。取得暂存目录后，可用 `start`、`status`、`wait` 和 `stop` 管理一次隔离运行；`start` 输出的 `run_id` 对应 `--runs-root` 下的 `run-<run_id>` 目录，再将该目录交给后续命令的 `--run` 参数。
 
-清单格式见 `examples/manifest.json`。失败返回非零退出码并输出 JSON。支持 Python 3.10+；真实进程检查仅支持 Windows。
+清单格式见 [examples/manifest.json](examples/manifest.json)，命令参数见 `electron-update-safety --help`。
 
-English overview: [README.en.md](README.en.md)。相关项目：[codex-history-compat](https://github.com/catterhu1207-ux/codex-history-compat)、[desktop-adaptation-lab](https://github.com/catterhu1207-ux/desktop-adaptation-lab)。
+## 它不能替你做什么？
 
-## 限制
+- 不判断第三方安装包是否安全、合法或获得授权。
+- 不证明应用功能已经正确；它证明的是来源、暂存和进程生命周期。界面与功能证据应交给 [desktop-adaptation-lab](https://github.com/catterhu1207-ux/desktop-adaptation-lab) 管理。
+- 不替代备份、代码审查或厂商更新说明。
 
-这是实验性源码发布。它不下载、安装或修改任何厂商应用，也不判断第三方包是否获得授权。进程识别依赖 Windows CIM。
+这是实验性源码发布。英文说明见 [README.en.md](README.en.md)。
