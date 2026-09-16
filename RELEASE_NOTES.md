@@ -1,3 +1,11 @@
+# v0.1.3
+
+Graceful shutdown support for Electron applications that remain in the tray after their last window closes.
+
+- Records an explicitly requested local DevTools port in the run identity.
+- Uses the Chrome DevTools Protocol `Browser.close` request during `stop`, after checking the run identity.
+- Keeps close timeouts non-destructive when the endpoint is unavailable.
+
 # v0.1.2
 
 Compatibility fix for Electron applications that resolve Windows known folders during startup.

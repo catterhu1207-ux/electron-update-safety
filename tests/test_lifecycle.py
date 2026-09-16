@@ -1,7 +1,7 @@
 import json, socket, tempfile, unittest
 from pathlib import Path
 from unittest import mock
-from electron_update_safety.lifecycle import IsolatedRun, ProcessIdentity
+from electron_update_safety.lifecycle import IsolatedRun, ProcessIdentity, _websocket_text_frame
 
 class LifecycleTests(unittest.TestCase):
     def make_run(self, root: Path):
@@ -37,3 +37,9 @@ class LifecycleTests(unittest.TestCase):
                 result=run.wait_for_exit(0)
             self.assertEqual(result['wait_status'],'timeout')
             self.assertTrue(result['main_identity_match'])
+    def test_websocket_close_frame_is_masked(self):
+        with mock.patch('electron_update_safety.lifecycle.os.urandom',return_value=b'abcd'):
+            frame=_websocket_text_frame(b'quit')
+        self.assertEqual(frame[:2],bytes((0x81,0x84)))
+        self.assertEqual(frame[2:6],b'abcd')
+        self.assertEqual(bytes(value ^ b'abcd'[index % 4] for index,value in enumerate(frame[6:])),b'quit')
