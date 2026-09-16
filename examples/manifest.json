@@ -1,0 +1,1 @@
+{"schema_version":1,"version":"1.2.3.4","source_files":{"ExampleApp.exe":"REPLACE_WITH_SHA256"},"required_consumers":{"adapter.py":["1.2.3.4"]}}
