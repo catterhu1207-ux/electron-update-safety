@@ -1,3 +1,11 @@
+# v0.1.1
+
+Maintenance release for deterministic Windows integration validation.
+
+- Waits up to five seconds for a newly spawned backend to appear in the Windows process table.
+- Ensures a failed assertion still waits for the test-owned process tree to exit naturally.
+- Leaves runtime process-status semantics unchanged.
+
 # v0.1.0
 
 Experimental source release for hash-gated update staging and isolated Windows process validation.
