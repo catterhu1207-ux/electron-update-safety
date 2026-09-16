@@ -15,10 +15,13 @@ It is for people maintaining custom desktop clients who need update evidence. It
 
 It provides the update-safety boundary for the multi-thread workflow changes described in [desktop-adaptation-lab](https://github.com/catterhu1207-ux/desktop-adaptation-lab): validate a new package in isolation without touching the live application or real session data.
 
-## Which of the three repositories do I need?
+To generate and run this Codex desktop mod from your own official installation, start with [codex-desktop-workflow](https://github.com/catterhu1207-ux/codex-desktop-workflow). It integrates this repository's safety layer into the complete build, verification, and launch path.
+
+## Which of the four repositories do I need?
 
 | Problem | Repository |
 |---|---|
+| Generate and run the mod from my own official Codex installation | [codex-desktop-workflow](https://github.com/catterhu1207-ux/codex-desktop-workflow) |
 | Is the candidate package correct, and did isolated testing leave a process behind? | **electron-update-safety** (this repository) |
 | Does a Codex history request fail at a Responses-compatible provider? | [codex-history-compat](https://github.com/catterhu1207-ux/codex-history-compat) |
 | How do I prevent a candidate from advancing without source-bound runtime proof? | [desktop-adaptation-lab](https://github.com/catterhu1207-ux/desktop-adaptation-lab) |

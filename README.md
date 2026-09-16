@@ -15,10 +15,13 @@
 
 它为 [desktop-adaptation-lab](https://github.com/catterhu1207-ux/desktop-adaptation-lab) 中介绍的多线程工作流改造提供更新安全边界：新包先在隔离副本验证，不碰正式应用和真实会话。
 
-## 三个仓库怎么选？
+如果你是想直接用自己的官方 Codex 安装目录生成这套魔改版，请从 [codex-desktop-workflow](https://github.com/catterhu1207-ux/codex-desktop-workflow) 开始。它已经把本仓库的安全能力接入完整的构建、验证和启动流程。
+
+## 四个仓库怎么选？
 
 | 你要解决的问题 | 使用这个仓库 |
 |---|---|
+| 用自己的官方 Codex 安装目录生成并运行魔改版 | [codex-desktop-workflow](https://github.com/catterhu1207-ux/codex-desktop-workflow) |
 | 候选包是不是对的？隔离测试有没有遗留进程？ | **electron-update-safety**（本仓库） |
 | Codex 向 Responses 兼容服务发送历史时被拒绝 | [codex-history-compat](https://github.com/catterhu1207-ux/codex-history-compat) |
 | 如何把“发现新版”推进到“已经真实验证”而不跳过证据 | [desktop-adaptation-lab](https://github.com/catterhu1207-ux/desktop-adaptation-lab) |
