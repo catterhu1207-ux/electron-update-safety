@@ -1,8 +1,8 @@
 # electron-update-safety
 
-Make desktop-mod updates easier to trust: identify the official candidate you actually received, work from a new copy every time, then prove that an isolated test leaves no background process behind.
+I built this tool because each official desktop update can require a new adaptation of my ChatGPT/Codex desktop mod. The package version, layout, or runtime behavior can change. I do not want to experiment repeatedly on the version I use every day, or call one successful start a completed adaptation.
 
-The tool grew out of ChatGPT/Codex desktop-mod update work, but it also fits other Windows Electron applications. It is a safety guardrail, not an updater or patcher.
+This tool isolates the first part of that work: identify the candidate actually received, begin from a new copy, then confirm that an isolated run leaves no background process behind after its window closes. It grew out of ChatGPT/Codex desktop-mod maintenance and also fits other Windows Electron applications.
 
 ## What can I use it for?
 
@@ -12,6 +12,8 @@ The tool grew out of ChatGPT/Codex desktop-mod update work, but it also fits oth
 - Track the main process and a named backend after the window closes, including orphaned backends, PID reuse, and close timeouts.
 
 It is for people maintaining custom desktop clients who need update evidence. It is not a one-click official downloader or automatic adaptation service.
+
+It provides the update-safety boundary for the multi-thread workflow changes described in [desktop-adaptation-lab](https://github.com/catterhu1207-ux/desktop-adaptation-lab): validate a new package in isolation without touching the live application or real session data.
 
 ## Which of the three repositories do I need?
 
