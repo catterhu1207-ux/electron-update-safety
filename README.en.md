@@ -8,7 +8,7 @@ This tool isolates the first part of that work: identify the candidate actually 
 
 - Check that a candidate application, backend descriptor, and explicit version references match a recorded manifest before changing anything.
 - Stage every attempt from an unmodified source copy instead of layering changes on a previously failed attempt.
-- Launch a candidate with separate user data, logs, and a run identifier, leaving the live application and real session data alone.
+- Launch a candidate with a separate Electron user-data directory, logs, and a run identifier, leaving the live application and real session data alone. Windows shell folders are inherited by default so Electron can resolve `appData`; use `--isolate-shell-folders` only with applications known to support it.
 - Track the main process and a named backend after the window closes, including orphaned backends, PID reuse, and close timeouts.
 
 It is for people maintaining custom desktop clients who need update evidence. It is not a one-click official downloader or automatic adaptation service.

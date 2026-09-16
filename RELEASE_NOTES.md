@@ -1,3 +1,11 @@
+# v0.1.2
+
+Compatibility fix for Electron applications that resolve Windows known folders during startup.
+
+- Keeps Windows shell folders inherited by default while continuing to isolate Electron `--user-data-dir`.
+- Adds the explicit `--isolate-shell-folders` option for applications that support redirected shell folders.
+- Records the selected shell-folder mode in each run record.
+
 # v0.1.1
 
 Maintenance release for deterministic Windows integration validation.

@@ -12,6 +12,8 @@ class WindowsIntegrationTests(unittest.TestCase):
                 run=IsolatedRun.start(Path(sys.executable),Path(directory),[str(example)])
                 backend=Path(sys.executable).name
                 try:
+                    self.assertEqual(run._load()['shell_folders'],'inherited')
+                    self.assertFalse((run.run_directory/'profile').exists())
                     deadline=time.monotonic()+5
                     while True:
                         active=run.status(backend)

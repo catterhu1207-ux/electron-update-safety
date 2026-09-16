@@ -45,7 +45,7 @@ class IsolatedRun:
         self._process: subprocess.Popen[bytes] | None = None
 
     @classmethod
-    def start(cls, executable: Path, runs_root: Path, args: list[str] | None = None, environment: dict[str, str] | None = None, debug_port: int | None = None) -> "IsolatedRun":
+    def start(cls, executable: Path, runs_root: Path, args: list[str] | None = None, environment: dict[str, str] | None = None, debug_port: int | None = None, isolate_shell_folders: bool = False) -> "IsolatedRun":
         executable = executable.resolve()
         if not executable.is_file():
             raise ValueError("executable_not_found")
@@ -61,9 +61,12 @@ class IsolatedRun:
             args.append(f"--remote-debugging-port={debug_port}")
         run = runs_root.resolve() / f"run-{uuid.uuid4().hex}"
         run.mkdir(parents=True, exist_ok=False)
-        profile = run / "profile"; local = run / "local-app-data"; roaming = run / "app-data"; user_data = run / "user-data"
-        for path in (profile, local, roaming, user_data): path.mkdir()
-        isolated_environment = {"USERPROFILE":str(profile),"LOCALAPPDATA":str(local),"APPDATA":str(roaming)}
+        user_data = run / "user-data"; user_data.mkdir()
+        isolated_environment: dict[str, str] = {}
+        if isolate_shell_folders:
+            profile = run / "profile"; local = run / "local-app-data"; roaming = run / "app-data"
+            for path in (profile, local, roaming): path.mkdir()
+            isolated_environment = {"USERPROFILE":str(profile),"LOCALAPPDATA":str(local),"APPDATA":str(roaming)}
         stdout = (run / "stdout.log").open("xb")
         stderr = (run / "stderr.log").open("xb")
         try:
@@ -82,6 +85,7 @@ class IsolatedRun:
             "main": asdict(current),
             "registered_backends": [],
             "executable_sha256": _sha256(executable),
+            "shell_folders": "isolated" if isolate_shell_folders else "inherited",
         }
         (run / "run.json").write_text(json.dumps(record, indent=2), encoding="utf-8")
         instance = cls(run)
